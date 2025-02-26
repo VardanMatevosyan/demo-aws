@@ -20,6 +20,7 @@ commands:
               --parameter-overrides \
                   ExistingVPC=$EXISTING_VPC \
                   ExistingPrivateSubnet1A=$EXISTING_PRIVATE_SUBNET_1A \
+                  ExistingPrivateSubnet1B=$EXISTING_PRIVATE_SUBNET_1B \
                   DBUsername=$DB_USERNAME \
                   DBPassword=$DB_PASSWORD \
                   RDSDatabaseEngine=$RDS_ENGINE \
