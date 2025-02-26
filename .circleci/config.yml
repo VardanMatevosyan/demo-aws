@@ -24,8 +24,9 @@ jobs:
   deploy:
     docker:
       - image: amazon/aws-cli
-  steps:
-    - cloudformation_deploy
+    steps:
+      - checkout
+      - cloudformation_deploy
 
 workflows:
   version: 2
