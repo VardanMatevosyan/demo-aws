@@ -10,16 +10,16 @@ commands:
             aws cloudformation deploy \
               --template-file cloudformation.yml \
               --stack-name demo-rds-stack \
-              --region ${AWS_FRANKFURT_REGION} \
+              --region $AWS_FRANKFURT_REGION \
               --parameter-overrides \
-                  ExistingVPC=${EXISTING_VPC} \
-                  ExistingPrivateSubnet_1a=${EXISTING_PRIVATE_SUBNET_1A} \
-                  DBUsername=${DB_USERNAME} \
-                  DBPassword=${DB_PASSWORD} \
-                  RDSDatabaseEngine=${RDS_ENGINE} \
-                  RDSDatabaseVersion=${RDS_VERSION} \
-                  AllowedInboundApplicationCidrIp=${ALLOWED_INBOUND_APPLICATION_CIDR_IP} \
-                  AllowedOutboundRdsCidrIp=${ALLOWED_OUTBOUND_RDS_CIDR_IP}
+                  ExistingVPC=$EXISTING_VPC \
+                  ExistingPrivateSubnet_1a=$EXISTING_PRIVATE_SUBNET_1A \
+                  DBUsername=$DB_USERNAME \
+                  DBPassword=$DB_PASSWORD \
+                  RDSDatabaseEngine=$RDS_ENGINE \
+                  RDSDatabaseVersion=$RDS_VERSION \
+                  AllowedInboundApplicationCidrIp=$ALLOWED_INBOUND_APPLICATION_CIDR_IP \
+                  AllowedOutboundRdsCidrIp=$ALLOWED_OUTBOUND_RDS_CIDR_IP
 
 jobs:
   deploy:
