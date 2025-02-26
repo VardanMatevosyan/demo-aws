@@ -7,8 +7,9 @@ commands:
       - run:
           name: "Deploy CloudFormation Stack"
           command: |
+            cd ../
             aws cloudformation deploy \
-              --template-file ../cloudformation.yml \
+              --template-file cloudformation.yml \
               --stack-name demo-rds-stack \
               --region ${AWS_FRANKFURT_REGION} \
               --parameter-overrides \
