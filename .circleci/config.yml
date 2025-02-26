@@ -10,6 +10,7 @@ commands:
             aws cloudformation deploy \
               --template-file ../cloudformation.yml \
               --stack-name demo-rds-stack \
+              --region ${AWS_FRANKFURT_REGION} \
               --parameter-overrides \
                   ExistingVPC=${EXISTING_VPC} \
                   ExistingPrivateSubnet_1a=${EXISTING_PRIVATE_SUBNET_1A} \
