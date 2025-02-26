@@ -1,0 +1,38 @@
+version: 2.1
+
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - deploy:
+
+
+jobs:
+  deploy:
+    docker:
+      - image: amazon/aws-cli
+  steps:
+    - cloudformation_deploy
+
+
+commands:
+  cloudformation_deploy:
+    description: "Deploy the cloudformation"
+    steps:
+      - run:
+          name: Deploy CloudFormation Stack
+          command: |
+            aws cloudformation deploy \
+              --template-file ../cloudformation.yml \
+              --stack-name demo-rds-stack \
+              --parameter-overrides \
+                  ExistingVPC=${EXISTING_VPC} \
+                  ExistingPrivateSubnet_1a=${EXISTING_PRIVATE_SUBNET_1A} \
+                  DBUsername=${DB_USERNAME} \
+                  DBPassword=${DB_PASSWORD} \
+                  RDSDatabaseEngine=${RDS_ENGINE} \
+                  RDSDatabaseVersion=${RDS_VERSION} \
+                  AllowedInboundApplicationCidrIp=${ALLOWED_INBOUND_APPLICATION_CIDR_IP} \
+                  AllowedOutboundRdsCidrIp=${ALLOWED_OUTBOUND_RDS_CIDR_IP}
+

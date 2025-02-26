@@ -1,0 +1,105 @@
+# All parameters to use from the env variables
+Parameters:
+  ExistingVPC:
+    Type: AWS::EC2::VPC::Id
+    Description: "Provide the existing VPC ID"
+
+  ExistingPrivateSubnet:
+    Type: AWS::EC2::Subnet::Id
+    Description: "Provide the private subnet ID where RDS will be deployed"
+
+  DBUsername:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    Description: "Database master username"
+
+  DBPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    MaxLength: 41
+    Description: "Database master password"
+
+  RDSDatabaseEngine:
+    Type: String
+    Description: "Database engine type (e.g., postgres, mysql, mariadb)"
+
+  RDSDatabaseVersion:
+    Type: String
+    Description: "Database engine version (e.g., 15.4)"
+
+  AllowedInboundApplicationCidrIp:
+    Type: String
+    Description: "CIDR block to allow application inbound traffic."
+
+  AllowedOutboundRdsCidrIp:
+    Type: String
+    Description: "CIDR block to allow access from (default is open to the world)"
+
+Resources:
+  # Define the DB Subnet Group to use the provided private subnet
+  DBSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: "Private Subnet Group for RDS"
+      SubnetIds:
+        - !Ref ExistingPrivateSubnet_1a
+
+  RDSInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceIdentifier: "private-postgres-db"
+      Engine: !Ref RDSDatabaseEngine
+      EngineVersion: !Ref RDSDatabaseVersion
+      DBInstanceClass: "db.t3.micro"
+      AllocatedStorage: "20"
+      StorageType: "gp2"
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      PubliclyAccessible: false
+      MultiAZ: false
+      DBSubnetGroupName: !Ref DBSubnetGroup  # Attach RDS to the Private Subnet
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
+      BackupRetentionPeriod: 7
+      DeletionProtection: false
+      EnableIAMDatabaseAuthentication: true
+
+  # Security Group for RDS
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for RDS PostgreSQL"
+      VpcId: !Ref ExistingVPC  # Attach to the existing VPC
+      SecurityGroupIngress:
+        # Allow inbound traffic from the application security group
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref AppSecurityGroup  # Only allow access from app
+      SecurityGroupEgress:
+        # Allow all outbound traffic from RDS (needed for updates, replication, etc.)
+        - IpProtocol: -1
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: !Ref AllowedOutboundRdsCidrIp
+
+  # Application Security Group (for Spring Boot app)
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for Spring Boot application"
+      VpcId: !Ref ExistingVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: !Ref AllowedInboundApplicationCidrIp  # Change this to restrict access further
+
+# Outputs variables to use easily to get the value for other config instead of manually searching on AWS
+Outputs:
+  RDSInstanceEndpoint:
+    Description: "RDS PostgreSQL Instance Endpoint"
+    Value: !GetAtt RDSInstance.Endpoint.Address
