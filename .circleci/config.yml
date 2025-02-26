@@ -1,27 +1,11 @@
 version: 2.1
 
-
-workflows:
-  version: 2
-  build:
-    jobs:
-      - deploy:
-
-
-jobs:
-  deploy:
-    docker:
-      - image: amazon/aws-cli
-  steps:
-    - cloudformation_deploy
-
-
 commands:
   cloudformation_deploy:
     description: "Deploy the cloudformation"
     steps:
       - run:
-          name: Deploy CloudFormation Stack
+          name: "Deploy CloudFormation Stack"
           command: |
             aws cloudformation deploy \
               --template-file ../cloudformation.yml \
@@ -36,3 +20,15 @@ commands:
                   AllowedInboundApplicationCidrIp=${ALLOWED_INBOUND_APPLICATION_CIDR_IP} \
                   AllowedOutboundRdsCidrIp=${ALLOWED_OUTBOUND_RDS_CIDR_IP}
 
+jobs:
+  deploy:
+    docker:
+      - image: amazon/aws-cli
+  steps:
+    - cloudformation_deploy
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - deploy:
