@@ -4,7 +4,7 @@ Parameters:
     Type: AWS::EC2::VPC::Id
     Description: "Provide the existing VPC ID"
 
-  ExistingPrivateSubnet_1a:
+  ExistingPrivateSubnet1A:
     Type: AWS::EC2::Subnet::Id
     Description: "Provide the private subnet ID where RDS will be deployed"
 
@@ -45,7 +45,7 @@ Resources:
     Properties:
       DBSubnetGroupDescription: "Private Subnet Group for RDS"
       SubnetIds:
-        - !Ref ExistingPrivateSubnet_1a
+        - !Ref ExistingPrivateSubnet1A
 
   RDSInstance:
     Type: "AWS::RDS::DBInstance"

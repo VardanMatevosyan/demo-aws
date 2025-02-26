@@ -19,7 +19,7 @@ commands:
               --region $AWS_FRANKFURT_REGION \
               --parameter-overrides \
                   ExistingVPC=$EXISTING_VPC \
-                  ExistingPrivateSubnet_1a=$EXISTING_PRIVATE_SUBNET_1A \
+                  ExistingPrivateSubnet1A=$EXISTING_PRIVATE_SUBNET_1A \
                   DBUsername=$DB_USERNAME \
                   DBPassword=$DB_PASSWORD \
                   RDSDatabaseEngine=$RDS_ENGINE \
