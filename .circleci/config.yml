@@ -7,7 +7,6 @@ commands:
       - run:
           name: "Deploy CloudFormation Stack"
           command: |
-            cd ../
             aws cloudformation deploy \
               --template-file cloudformation.yml \
               --stack-name demo-rds-stack \
