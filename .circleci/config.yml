@@ -26,7 +26,9 @@ commands:
                   RDSDatabaseEngine=$RDS_ENGINE \
                   RDSDatabaseVersion=$RDS_VERSION \
                   AllowedInboundApplicationCidrIp=$ALLOWED_INBOUND_APPLICATION_CIDR_IP \
-                  AllowedOutboundRdsCidrIp=$ALLOWED_OUTBOUND_RDS_CIDR_IP
+                  AllowedOutboundRdsCidrIp=$ALLOWED_OUTBOUND_RDS_CIDR_IP \
+                  AllowedSSHInboundCidrIp=$ALLOWED_SSH_INBOUND_CIDR_IP \
+                  ProxyJumpAmiId=$PROXY_JUMP_AMI_ID \
 
 jobs:
   deploy:

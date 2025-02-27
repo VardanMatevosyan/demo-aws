@@ -42,8 +42,16 @@ Parameters:
     Type: String
     Description: "CIDR block to allow access from (default is open to the world)"
 
+  AllowedSSHInboundCidrIp:
+    Type: String
+    Description: "Public IP to allow SSH access (e.g., 203.0.113.0/32)"
+
+  ProxyJumpAmiId:
+    Type: String
+    Description: "AMI ID for Proxy Jump EC2 instance (Amazon Linux 2 recommended)"
+
 Resources:
-  # Define the DB Subnet Group to use the provided private subnet
+  # DB Subnet Group to use the provided private subnet
   DBSubnetGroup:
     Type: "AWS::RDS::DBSubnetGroup"
     Properties:
@@ -65,12 +73,22 @@ Resources:
       MasterUserPassword: !Ref DBPassword
       PubliclyAccessible: false
       MultiAZ: false
-      DBSubnetGroupName: !Ref DBSubnetGroup  # Attach RDS to the Private Subnet
+      DBSubnetGroupName: !Ref DBSubnetGroup  # Attached RDS to the Private Subnet
       VPCSecurityGroups:
         - !Ref RDSSecurityGroup
       BackupRetentionPeriod: 7
       DeletionProtection: false
       EnableIAMDatabaseAuthentication: true
+
+  # EC2 Instance to act as Proxy Jump Server (Now in Public Subnet)
+  ProxyJumpInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !Ref ProxyJumpAmiId
+      SubnetId: !Ref ExistingPublicSubnet1C
+      SecurityGroupIds:
+        - !Ref ProxyJumpSecurityGroup
 
   # Security Group for RDS
   RDSSecurityGroup:
@@ -83,7 +101,11 @@ Resources:
         - IpProtocol: tcp
           FromPort: 5432
           ToPort: 5432
-          SourceSecurityGroupId: !Ref AppSecurityGroup  # Only allow access from app
+          SourceSecurityGroupId: !Ref AppSecurityGroup  # Access from app
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ProxyJumpSecurityGroup  # Access from Proxy Jump EC2
       SecurityGroupEgress:
         # Allow all outbound traffic from RDS (needed for updates, replication, etc.)
         - IpProtocol: -1
@@ -101,7 +123,18 @@ Resources:
         - IpProtocol: tcp
           FromPort: 8080
           ToPort: 8080
-          CidrIp: !Ref AllowedInboundApplicationCidrIp  # Change this to restrict access further
+          CidrIp: !Ref AllowedInboundApplicationCidrIp
+
+  ProxyJumpSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for Proxy Jump EC2 to access RDS"
+      VpcId: !Ref ExistingVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AllowedSSHInboundCidrIp
 
 # Outputs variables to use easily to get the value for other config instead of manually searching on AWS
 Outputs:
