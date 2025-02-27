@@ -54,6 +54,10 @@ Parameters:
     Type: String
     Description: "AMI ID for Proxy Jump EC2 instance (Amazon Linux 2 recommended)"
 
+  ProxyJumpServerKeyName:
+    Type: String
+    Description: "Proxy jump server key name to access the instance"
+
 Resources:
   # DB Subnet Group to use the provided private subnet
   DBSubnetGroup:
@@ -93,6 +97,10 @@ Resources:
       SubnetId: !Ref ExistingPublicSubnet1C
       SecurityGroupIds:
         - !Ref ProxyJumpSecurityGroup
+      KeyName: !Ref ProxyJumpServerKeyName  # Ensure you have an existing key-pair for SSH
+      Tags:
+        - Key: Name
+          Value: "Proxy Jump RDS Dev Server"
 
   # Security Group for RDS
   RDSSecurityGroup:

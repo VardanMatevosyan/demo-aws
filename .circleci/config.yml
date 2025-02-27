@@ -30,6 +30,7 @@ commands:
                   AllowedOutboundRdsCidrIp=$ALLOWED_OUTBOUND_RDS_CIDR_IP \
                   AllowedSSHInboundCidrIp=$ALLOWED_SSH_INBOUND_CIDR_IP \
                   ProxyJumpAmiId=$PROXY_JUMP_AMI_ID \
+                  ProxyJumpServerKeyName=$PROXY_JUMP_SERVER_KEY_NAME \
 
 jobs:
   deploy:
