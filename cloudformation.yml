@@ -12,6 +12,10 @@ Parameters:
     Type: AWS::EC2::Subnet::Id
     Description: "Private Subnet in AZ1B"
 
+  ExistingPublicSubnet1C:
+    Type: AWS::EC2::Subnet::Id
+    Description: "Public Subnet in AZ1C"
+
   DBUsername:
     Type: String
     NoEcho: true
