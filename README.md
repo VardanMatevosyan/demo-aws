@@ -3,7 +3,7 @@ Demo code using AWS cloud services (S3, DynamoDB, RDS, ...) by using security be
 
 # AWS commands:
 
-## RDS
+# **RDS**
 
 ### List all RDS available engine versions for specific engine name. For example postgres like in the example below
 ```bash
@@ -55,9 +55,10 @@ Example of output
 ```
 
 
-## EC2
 
-### List List Official Amazon Linux AMIs
+# **EC2**
+
+### List Official Amazon Linux AMIs
 ```bash
 
 aws ec2 describe-images --owners amazon --filters "Name=name,Values=amzn2-ami-hvm-*-x86_64-gp2" --query 'Images[*].[ImageId,Name]' --output table
@@ -78,3 +79,24 @@ Example of output
 +------------------------+-------------------------------------------+
 ```
 
+
+
+# **CLI access to RDS PostgreSQL from EC2 Amazon Linux 2**
+#### To have access to the RDS using 
+* ###### Connect using EC2 from the UI 
+* ###### Connect from local machine where SSH connection to Proxy Jump Server established
+#### We need to install PostgreSQL 10+ version because version lower than 10 would no allow to connect using CLI
+
+### Amazon Linux commands
+```bash
+
+ sudo yum install -y amazon-linux-extras
+
+```
+
+### Installing PostgreSQL 10 
+```bash
+
+ sudo amazon-linux-extras install postgresql10
+
+```
