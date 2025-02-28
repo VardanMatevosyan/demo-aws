@@ -29,6 +29,7 @@ repositories {
 ext {
     springCloudVersion = '2.2.6.RELEASE'
     awsSdkVersion = '2.29.1'
+    posgresqlVersion = '42.7.4'
 }
 
 dependencies {
@@ -39,13 +40,11 @@ dependencies {
     implementation "software.amazon.awssdk:dynamodb"
     implementation 'software.amazon.awssdk:dynamodb-enhanced'
     implementation 'com.amazonaws:aws-java-sdk-dynamodb:1.12.765'
+    implementation "org.postgresql:postgresql:${posgresqlVersion}"
 
-
-
-
-
-//    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
