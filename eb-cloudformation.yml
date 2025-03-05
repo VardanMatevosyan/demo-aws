@@ -117,7 +117,7 @@ Resources:
                   - "s3:PutObject"
                 Resource: "*"
 
-Outputs:
-  EnvironmentURL:
-    Description: "URL of the deployed Elastic Beanstalk environment"
-    Value: !Sub "http://${ElasticBeanstalkEnvironment.EnvironmentName}.elasticbeanstalk.com"
+#Outputs:
+#  EnvironmentURL:
+#    Description: "URL of the deployed Elastic Beanstalk environment"
+#    Value: !Sub "http://${ElasticBeanstalkEnvironment.EnvironmentName}.elasticbeanstalk.com"
