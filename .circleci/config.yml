@@ -90,7 +90,7 @@ commands:
           name: "Deploy application to Elastic BeanStalk"
           command: |
             eb init dev-ElasticBeanstalkApp-2N0NR18IVSK1 -r $AWS_REGION -p corretto-21
-            eb deploy --environment $ENV_NAME
+            eb deploy $ENV_NAME
       - run: ls -l build/libs
 jobs:
   build-job:
