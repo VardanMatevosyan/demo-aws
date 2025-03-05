@@ -27,7 +27,6 @@ Resources:
     Type: "AWS::ElasticBeanstalk::Environment"
     Properties:
       ApplicationName: !Ref ElasticBeanstalkApp
-      EnvironmentName: "develop"
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 17"
       OptionSettings:
         # VPC ID where the Elastic Beanstalk environment should be deployed
