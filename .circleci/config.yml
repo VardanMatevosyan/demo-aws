@@ -119,10 +119,12 @@ workflows:
   version: 2
   build:
     jobs:
-      - build-job:
-          <<: *only-main-branch-filter
       - deploy-main-cf-job
       - deploy-eb-cf-job:
+          context: aws-credentials
+      - build-job:
+          <<: *only-main-branch-filter
+      - deploy-eb-app-job:
           requires:
             - build-job
           context: aws-credentials
