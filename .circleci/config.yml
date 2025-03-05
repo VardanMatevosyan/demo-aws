@@ -78,7 +78,6 @@ commands:
 jobs:
   build-job:
     executor: java-executor
-    environment-name: $ENV_NAME
     filters:
       branches:
         only:
@@ -93,7 +92,6 @@ jobs:
       - cloudformation_main_deploy_command
   deploy-eb-cf-job:
     executor: aws-cli-executor
-    environment-name: $ENV_NAME
     filters:
       branches:
         only:
@@ -103,7 +101,6 @@ jobs:
       - deploy-eb-cf-command
   deploy-eb-app-job:
     executor:  base-executor
-    environment-name: $ENV_NAME
     filters:
       branches:
         only:
