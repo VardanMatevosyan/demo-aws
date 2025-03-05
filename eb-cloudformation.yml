@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "AWS Elastic Beanstalk environment setup with free-tier eligible resources."
+
+Parameters:
+  ExistingVPC:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/ExistingVPC"
+  AllowedSSHToEbInboundCidrIp:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/AllowedSSHToEbInboundCidrIp"
+  AllowedWebEbInboundCidrIp:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/AllowedWebEbInboundCidrIp"
+
+Resources:
+  # Elastic Beanstalk Application
+  ElasticBeanstalkApp:
+    Type: "AWS::ElasticBeanstalk::Application"
+    Properties:
+      ApplicationName: "demo-aws-eb-app"
+
+  # Elastic Beanstalk Environment
+  ElasticBeanstalkEnvironment:
+    Type: "AWS::ElasticBeanstalk::Environment"
+    Properties:
+      ApplicationName: !Ref ElasticBeanstalkApp
+      EnvironmentName: "dev"
+      SolutionStackName: "64bit Amazon Linux 2023 v4.0.3 running Corretto 17"
+      OptionSettings:
+        # Deployment Policy - Rolling (Default)
+        - Namespace: "aws:elasticbeanstalk:command"
+          OptionName: "DeploymentPolicy"
+          Value: "Rolling"
+
+        # Rolling Batch Size (Fixed: 1 instance at a time)
+        - Namespace: "aws:elasticbeanstalk:command"
+          OptionName: "BatchSize"
+          Value: "1"
+
+        # Instance Type (Free Tier eligible)
+        - Namespace: "aws:ec2:instances"
+          OptionName: "InstanceType"
+          Value: "t3.micro"
+
+        # Associate Security Group
+        - Namespace: "aws:autoscaling:launchconfiguration"
+          OptionName: "SecurityGroups"
+          Value: !Ref BeanstalkSecurityGroup
+
+        # IAM Instance Profile (Attach Permissions)
+        - Namespace: "aws:autoscaling:launchconfiguration"
+          OptionName: "IamInstanceProfile"
+          Value: !Ref BeanstalkInstanceProfile
+
+  # Security Group for EC2
+  BeanstalkSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Security group for Elastic Beanstalk instances"
+      VpcId: !Ref ExistingVPC
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AllowedSSHToEbInboundCidrIp
+        - IpProtocol: "tcp"
+          FromPort: 80
+          ToPort: 80
+          CidrIp: !Ref AllowedWebEbInboundCidrIp
+
+  # IAM Role for Elastic Beanstalk
+  BeanstalkInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Roles:
+        - !Ref BeanstalkEC2Role
+
+  BeanstalkEC2Role:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: "ec2.amazonaws.com"
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "ElasticBeanstalkEC2Policy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:GetObject"
+                  - "s3:PutObject"
+                Resource: "*"
+
+Outputs:
+  EnvironmentURL:
+    Description: "URL of the deployed Elastic Beanstalk environment"
+    Value: !Sub "http://${ElasticBeanstalkEnvironment.EnvironmentName}.elasticbeanstalk.com"

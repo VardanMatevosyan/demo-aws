@@ -1,7 +1,32 @@
 version: 2.1
 
+orbs:
+  eb: circleci/aws-elastic-beanstalk@2.0.1
+
+executors:
+  java-executor:
+    docker:
+      - image: cimg/openjdk:21.0
+  aws-cli-executor:
+    docker:
+      - image: amazon/aws-cli
+  base-executor:
+    docker:
+      - image: cimg/base:stable
+
 commands:
-  cloudformation_deploy:
+  build-app:
+    description: "Build demo-aws application"
+    steps:
+      - checkout
+      - run:
+          name: Build
+          command: ./gradlew clean build -x test
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  cloudformation_main_deploy_command:
     description: "Deploy the cloudformation"
     steps:
       - run:
@@ -10,8 +35,9 @@ commands:
             aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
             aws configure set region $AWS_FRANKFURT_REGION
+
       - run:
-          name: "Deploy CloudFormation Stack"
+          name: "Deploy CloudFormation Stack" #  this is when we are using CI envs (too much to define but as an example)
           command: |
             aws cloudformation deploy \
               --template-file cloudformation.yml \
@@ -31,17 +57,69 @@ commands:
                   AllowedSSHInboundCidrIp=$ALLOWED_SSH_INBOUND_CIDR_IP \
                   ProxyJumpAmiId=$PROXY_JUMP_AMI_ID \
                   ProxyJumpServerKeyName=$PROXY_JUMP_SERVER_KEY_NAME \
-
+  deploy-eb-cf-command:
+    description: "Deploy the cloudformation to Elastic BeanStalk"
+    steps:
+      - run:
+          name: "Deploy Cloudformation to Elastic BeanStalk"
+          command: |
+            ws cloudformation deploy \
+              --template-file eb-cloudformation.yml \
+              --stack-name dev \
+              --region $AWS_FRANKFURT_REGION
+  deploy-eb-app-command:
+    description: "Deploy the application to Elastic BeanStalk"
+    steps:
+      - run:
+          name: "Deploy application to Elastic BeanStalk"
+          command: |
+            eb deploy $ENV_NAME
 jobs:
-  deploy:
-    docker:
-      - image: amazon/aws-cli
+  build-job:
+    executor: java-executor
+    environment-name: $ENV_NAME
+    filters:
+      branches:
+        only:
+          - main
     steps:
       - checkout
-      - cloudformation_deploy
+      - build_app
+  deploy-main-cf-job:
+    executor: aws-cli-executor
+    steps:
+      - checkout
+      - cloudformation_main_deploy_command
+  deploy-eb-cf-job:
+    executor: aws-cli-executor
+    environment-name: $ENV_NAME
+    filters:
+      branches:
+        only:
+          - main
+    steps:
+      - checkout
+      - deploy-eb-cf-command
+  deploy-eb-app-job:
+    executor:  base-executor
+    environment-name: $ENV_NAME
+    filters:
+      branches:
+        only:
+          - main
+    steps:
+      - attach_workspace:
+          at: .
+      - eb/setup
+      - deploy-eb-app-command
 
 workflows:
   version: 2
   build:
     jobs:
-      - deploy
+      - build-job
+      - deploy-main-cf-job
+      - deploy-eb-cf-job:
+          requires:
+            - build
+          context: aws-credentials
