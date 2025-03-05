@@ -63,7 +63,7 @@ Resources:
         - Namespace: "aws:autoscaling:launchconfiguration"
           OptionName: "IamInstanceProfile"
           Value: !Ref BeanstalkInstanceProfile
-      SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 17"
+      SolutionStackName: "64bit Amazon Linux 2023 v5.5.0 running Tomcat 11 Corretto 21"
 
   # Elastic Beanstalk Environment
   ElasticBeanstalkEnvironment:

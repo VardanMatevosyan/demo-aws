@@ -19,9 +19,9 @@ executors:
   aws-cli-executor:
     docker:
       - image: amazon/aws-cli
-  python-executor:
+  base-executor:
     docker:
-      - image: cimg/python:3.10
+      - image: cimg/base:stable
 
 commands:
   build-app:
@@ -89,6 +89,7 @@ commands:
       - run:
           name: "Deploy application to Elastic BeanStalk"
           command: |
+            eb init dev-ElasticBeanstalkApp-2N0NR18IVSK1 -r $AWS_REGION -p corretto-21 \
             eb deploy $ENV_NAME
       - run: ls -l build/libs
 jobs:
@@ -108,7 +109,7 @@ jobs:
       - checkout
       - deploy-eb-cf-command
   deploy-eb-app-job:
-    executor: python-executor
+    executor: base-executor
     steps:
       - attach_workspace:
           at: .
