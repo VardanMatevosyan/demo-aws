@@ -81,7 +81,8 @@ commands:
             aws cloudformation deploy \
               --template-file eb-cloudformation.yml \
               --stack-name dev \
-              --region $AWS_FRANKFURT_REGION
+              --region $AWS_FRANKFURT_REGION \
+              --capabilities CAPABILITY_IAM
   deploy-eb-app-command:
     description: "Deploy the application to Elastic BeanStalk"
     steps:
