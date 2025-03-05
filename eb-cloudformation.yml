@@ -20,49 +20,59 @@ Resources:
   ElasticBeanstalkApp:
     Type: "AWS::ElasticBeanstalk::Application"
     Properties:
-      ApplicationName: "demo-aws-eb-app"
+      Description: "AWS application"
+#      ApplicationName: !Sub '${EnvironmentName}-${ApplicationName}'
+
+  SampleConfigurationTemplate:
+    Type: AWS::ElasticBeanstalk::ConfigurationTemplate
+    Properties:
+      ApplicationName: !Ref ElasticBeanstalkApp
+      Description: "AWS ElasticBeanstalk Sample Configuration Template"
+      OptionSettings:
+        OptionSettings:
+          # VPC ID where the Elastic Beanstalk environment should be deployed
+          - Namespace: "aws:ec2:vpc"
+            OptionName: "VPCId"
+            Value: !Ref ExistingVPC
+
+          # Subnet in the VPC for the Elastic Beanstalk instances
+          - Namespace: "aws:ec2:vpc"
+            OptionName: "Subnets"
+            Value: !Ref ExistingVpcSubnet1C
+
+          # Deployment Policy - Rolling (Default)
+          - Namespace: "aws:elasticbeanstalk:command"
+            OptionName: "DeploymentPolicy"
+            Value: "Rolling"
+
+          # Rolling Batch Size (Fixed: 1 instance at a time)
+          - Namespace: "aws:elasticbeanstalk:command"
+            OptionName: "BatchSize"
+            Value: "1"
+
+          # Instance Type (Free Tier eligible)
+          - Namespace: "aws:autoscaling:launchconfiguration"
+            OptionName: "InstanceType"
+            Value: "t3.micro"
+
+          # Associate Security Group
+          - Namespace: "aws:autoscaling:launchconfiguration"
+            OptionName: "SecurityGroups"
+            Value: !Ref BeanstalkSecurityGroup
+
+          # IAM Instance Profile (Attach Permissions)
+          - Namespace: "aws:autoscaling:launchconfiguration"
+            OptionName: "IamInstanceProfile"
+            Value: !Ref BeanstalkInstanceProfile
+      SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 17"
 
   # Elastic Beanstalk Environment
   ElasticBeanstalkEnvironment:
     Type: "AWS::ElasticBeanstalk::Environment"
     Properties:
       ApplicationName: !Ref ElasticBeanstalkApp
-      SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 17"
-      OptionSettings:
-        # VPC ID where the Elastic Beanstalk environment should be deployed
-        - Namespace: "aws:ec2:vpc"
-          OptionName: "VPCId"
-          Value: !Ref ExistingVPC
-
-        # Subnet in the VPC for the Elastic Beanstalk instances
-        - Namespace: "aws:ec2:vpc"
-          OptionName: "Subnets"
-          Value: !Ref ExistingVpcSubnet1C
-
-        # Deployment Policy - Rolling (Default)
-        - Namespace: "aws:elasticbeanstalk:command"
-          OptionName: "DeploymentPolicy"
-          Value: "Rolling"
-
-        # Rolling Batch Size (Fixed: 1 instance at a time)
-        - Namespace: "aws:elasticbeanstalk:command"
-          OptionName: "BatchSize"
-          Value: "1"
-
-        # Instance Type (Free Tier eligible)
-        - Namespace: "aws:autoscaling:launchconfiguration"
-          OptionName: "InstanceType"
-          Value: "t3.micro"
-
-        # Associate Security Group
-        - Namespace: "aws:autoscaling:launchconfiguration"
-          OptionName: "SecurityGroups"
-          Value: !Ref BeanstalkSecurityGroup
-
-        # IAM Instance Profile (Attach Permissions)
-        - Namespace: "aws:autoscaling:launchconfiguration"
-          OptionName: "IamInstanceProfile"
-          Value: !Ref BeanstalkInstanceProfile
+      Description: "AWS ElasticBeanstalk Sample demo-aws Environment"
+      TemplateName: !Ref SampleConfigurationTemplate
 
   # Security Group for EC2
   BeanstalkSecurityGroup:
