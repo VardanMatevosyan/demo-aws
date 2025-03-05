@@ -24,7 +24,7 @@ Resources:
     Type: "AWS::ElasticBeanstalk::Environment"
     Properties:
       ApplicationName: !Ref ElasticBeanstalkApp
-      EnvironmentName: "dev"
+      EnvironmentName: "develop"
       SolutionStackName: "64bit Amazon Linux 2023 v4.0.3 running Corretto 17"
       OptionSettings:
         # Deployment Policy - Rolling (Default)
