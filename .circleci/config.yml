@@ -35,7 +35,7 @@ commands:
           root: .
           paths:
             - build/libs/*.jar
-  cloudformation_main_deploy_command:
+  cloudformation-main-deploy-command:
     description: "Deploy the cloudformation"
     steps:
       - run:
@@ -89,12 +89,12 @@ jobs:
     executor: java-executor
     steps:
       - checkout
-      - build_app
+      - build-app
   deploy-main-cf-job:
     executor: aws-cli-executor
     steps:
       - checkout
-      - cloudformation_main_deploy_command
+      - cloudformation-main-deploy-command
   deploy-eb-cf-job:
     executor: aws-cli-executor
     steps:
