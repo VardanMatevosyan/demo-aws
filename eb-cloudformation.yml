@@ -29,41 +29,40 @@ Resources:
       ApplicationName: !Ref ElasticBeanstalkApp
       Description: "AWS ElasticBeanstalk Sample Configuration Template"
       OptionSettings:
-        OptionSettings:
-          # VPC ID where the Elastic Beanstalk environment should be deployed
-          - Namespace: "aws:ec2:vpc"
-            OptionName: "VPCId"
-            Value: !Ref ExistingVPC
+        # VPC ID where the Elastic Beanstalk environment should be deployed
+        - Namespace: "aws:ec2:vpc"
+          OptionName: "VPCId"
+          Value: !Ref ExistingVPC
 
-          # Subnet in the VPC for the Elastic Beanstalk instances
-          - Namespace: "aws:ec2:vpc"
-            OptionName: "Subnets"
-            Value: !Ref ExistingVpcSubnet1C
+        # Subnet in the VPC for the Elastic Beanstalk instances
+        - Namespace: "aws:ec2:vpc"
+          OptionName: "Subnets"
+          Value: !Ref ExistingVpcSubnet1C
 
-          # Deployment Policy - Rolling (Default)
-          - Namespace: "aws:elasticbeanstalk:command"
-            OptionName: "DeploymentPolicy"
-            Value: "Rolling"
+        # Deployment Policy - Rolling (Default)
+        - Namespace: "aws:elasticbeanstalk:command"
+          OptionName: "DeploymentPolicy"
+          Value: "Rolling"
 
-          # Rolling Batch Size (Fixed: 1 instance at a time)
-          - Namespace: "aws:elasticbeanstalk:command"
-            OptionName: "BatchSize"
-            Value: "1"
+        # Rolling Batch Size (Fixed: 1 instance at a time)
+        - Namespace: "aws:elasticbeanstalk:command"
+          OptionName: "BatchSize"
+          Value: "1"
 
-          # Instance Type (Free Tier eligible)
-          - Namespace: "aws:autoscaling:launchconfiguration"
-            OptionName: "InstanceType"
-            Value: "t3.micro"
+        # Instance Type (Free Tier eligible)
+        - Namespace: "aws:autoscaling:launchconfiguration"
+          OptionName: "InstanceType"
+          Value: "t3.micro"
 
-          # Associate Security Group
-          - Namespace: "aws:autoscaling:launchconfiguration"
-            OptionName: "SecurityGroups"
-            Value: !Ref BeanstalkSecurityGroup
+        # Associate Security Group
+        - Namespace: "aws:autoscaling:launchconfiguration"
+          OptionName: "SecurityGroups"
+          Value: !Ref BeanstalkSecurityGroup
 
-          # IAM Instance Profile (Attach Permissions)
-          - Namespace: "aws:autoscaling:launchconfiguration"
-            OptionName: "IamInstanceProfile"
-            Value: !Ref BeanstalkInstanceProfile
+        # IAM Instance Profile (Attach Permissions)
+        - Namespace: "aws:autoscaling:launchconfiguration"
+          OptionName: "IamInstanceProfile"
+          Value: !Ref BeanstalkInstanceProfile
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 17"
 
   # Elastic Beanstalk Environment
