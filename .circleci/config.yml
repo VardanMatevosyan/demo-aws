@@ -70,6 +70,12 @@ commands:
     description: "Deploy the cloudformation to Elastic BeanStalk"
     steps:
       - run:
+          name: "Configure AWS CLI"
+          command: |
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            aws configure set region $AWS_FRANKFURT_REGION
+      - run:
           name: "Deploy Cloudformation to Elastic BeanStalk"
           command: |
             aws cloudformation deploy \
