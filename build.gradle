@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'org.example'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 java {
     toolchain {
@@ -54,4 +54,9 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+tasks.named("jar").configure {
+    archiveClassifier.set("")
+    enabled(true)
 }
