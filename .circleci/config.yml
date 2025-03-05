@@ -19,9 +19,9 @@ executors:
   aws-cli-executor:
     docker:
       - image: amazon/aws-cli
-  base-executor:
+  python-executor:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/python:3.10
 
 commands:
   build-app:
@@ -108,7 +108,7 @@ jobs:
       - checkout
       - deploy-eb-cf-command
   deploy-eb-app-job:
-    executor:  base-executor
+    executor: python-executor
     steps:
       - attach_workspace:
           at: .
@@ -126,6 +126,7 @@ workflows:
           <<: *only-main-branch-filter
       - deploy-eb-app-job:
           requires:
+            - deploy-eb-cf-job
             - build-job
           context: aws-credentials
 

@@ -19,8 +19,8 @@ Resources:
   # Elastic Beanstalk Application
   ElasticBeanstalkApp:
     Type: "AWS::ElasticBeanstalk::Application"
-#    Properties:
-#      ApplicationName: "demo-aws-eb-app"
+    Properties:
+      ApplicationName: "demo-aws-eb-app"
 
   # Elastic Beanstalk Environment
   ElasticBeanstalkEnvironment:
