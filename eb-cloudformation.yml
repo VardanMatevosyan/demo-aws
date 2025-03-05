@@ -38,7 +38,7 @@ Resources:
           Value: "1"
 
         # Instance Type (Free Tier eligible)
-        - Namespace: "aws:ec2:instances"
+        - Namespace: "aws:autoscaling:launchconfiguration"
           OptionName: "InstanceType"
           Value: "t3.micro"
 
