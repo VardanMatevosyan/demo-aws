@@ -11,6 +11,9 @@ Parameters:
   AllowedWebEbInboundCidrIp:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/AllowedWebEbInboundCidrIp"
+  ExistingVpcSubnet1C:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/ExistingVpcSubnet1C"
 
 Resources:
   # Elastic Beanstalk Application
@@ -27,6 +30,16 @@ Resources:
       EnvironmentName: "develop"
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 17"
       OptionSettings:
+        # VPC ID where the Elastic Beanstalk environment should be deployed
+        - Namespace: "aws:ec2:vpc"
+          OptionName: "VPCId"
+          Value: !Ref ExistingVPC
+
+        # Subnet in the VPC for the Elastic Beanstalk instances
+        - Namespace: "aws:ec2:vpc"
+          OptionName: "Subnets"
+          Value: !Ref ExistingVpcSubnet1C
+
         # Deployment Policy - Rolling (Default)
         - Namespace: "aws:elasticbeanstalk:command"
           OptionName: "DeploymentPolicy"
