@@ -58,5 +58,10 @@ tasks.named('test') {
 
 tasks.named("jar").configure {
     archiveClassifier.set("")
-    enabled(true)
+    enabled(false)
+
+    manifest {
+        attributes 'Main-Class': 'org.example.demoaws.DemoAwsApplication'
+    }
+
 }
