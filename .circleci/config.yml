@@ -90,6 +90,8 @@ commands:
           name: "Deploy application to Elastic BeanStalk"
           command: |
             eb init $EB_APP_NAME -r $AWS_REGION -p corretto-21
+            echo "deploy:
+                    artifact: build/libs/demo-aws-0.0.1.jar" >> .elasticbeanstalk/config.yml
             eb deploy $EB_ENV_NAME --label demo-aws-$(date +%Y%m%d)-2
       - run: ls -l build/libs
 jobs:
