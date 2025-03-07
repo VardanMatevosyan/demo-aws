@@ -19,9 +19,9 @@ executors:
   aws-cli-executor:
     docker:
       - image: amazon/aws-cli
-  python-executor:
+  base-executor:
     docker:
-      - image: cimg/python:3.10
+      - image: cimg/base:stable
 
 commands:
   build-app:
@@ -89,7 +89,10 @@ commands:
       - run:
           name: "Deploy application to Elastic BeanStalk"
           command: |
-            eb deploy $ENV_NAME
+            eb init $EB_APP_NAME -r $AWS_REGION -p corretto-21
+            echo "deploy:
+                    artifact: build/libs/demo-aws-0.0.1.jar" >> .elasticbeanstalk/config.yml
+            eb deploy $EB_ENV_NAME --label demo-aws-$(date +%Y%m%d)-3
       - run: ls -l build/libs
 jobs:
   build-job:
@@ -108,7 +111,7 @@ jobs:
       - checkout
       - deploy-eb-cf-command
   deploy-eb-app-job:
-    executor: python-executor
+    executor: base-executor
     steps:
       - attach_workspace:
           at: .
@@ -120,13 +123,13 @@ workflows:
   build:
     jobs:
       - deploy-main-cf-job
-      - deploy-eb-cf-job:
-          context: aws-credentials
+#      - deploy-eb-cf-job:
+#          context: aws-credentials
       - build-job:
           <<: *only-main-branch-filter
       - deploy-eb-app-job:
           requires:
-            - deploy-eb-cf-job
+#            - deploy-eb-cf-job
             - build-job
           context: aws-credentials
 

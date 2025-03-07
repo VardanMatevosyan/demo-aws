@@ -20,14 +20,14 @@ Resources:
   ElasticBeanstalkApp:
     Type: "AWS::ElasticBeanstalk::Application"
     Properties:
-      ApplicationName: "demo-aws-eb-app"
+      Description: "AWS application"
+#      ApplicationName: !Sub '${EnvironmentName}-${ApplicationName}'
 
-  # Elastic Beanstalk Environment
-  ElasticBeanstalkEnvironment:
-    Type: "AWS::ElasticBeanstalk::Environment"
+  SampleConfigurationTemplate:
+    Type: AWS::ElasticBeanstalk::ConfigurationTemplate
     Properties:
       ApplicationName: !Ref ElasticBeanstalkApp
-      SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 17"
+      Description: "AWS ElasticBeanstalk Sample Configuration Template"
       OptionSettings:
         # VPC ID where the Elastic Beanstalk environment should be deployed
         - Namespace: "aws:ec2:vpc"
@@ -63,6 +63,15 @@ Resources:
         - Namespace: "aws:autoscaling:launchconfiguration"
           OptionName: "IamInstanceProfile"
           Value: !Ref BeanstalkInstanceProfile
+      SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 21"
+
+  # Elastic Beanstalk Environment
+  ElasticBeanstalkEnvironment:
+    Type: "AWS::ElasticBeanstalk::Environment"
+    Properties:
+      ApplicationName: !Ref ElasticBeanstalkApp
+      Description: "AWS ElasticBeanstalk Sample demo-aws Environment"
+      TemplateName: !Ref SampleConfigurationTemplate
 
   # Security Group for EC2
   BeanstalkSecurityGroup:
@@ -107,8 +116,12 @@ Resources:
                   - "s3:GetObject"
                   - "s3:PutObject"
                 Resource: "*"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier
+        - arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker
+        - arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier
 
-Outputs:
-  EnvironmentURL:
-    Description: "URL of the deployed Elastic Beanstalk environment"
-    Value: !Sub "http://${ElasticBeanstalkEnvironment.EnvironmentName}.elasticbeanstalk.com"
+#Outputs:
+#  EnvironmentURL:
+#    Description: "URL of the deployed Elastic Beanstalk environment"
+#    Value: !Sub "http://${ElasticBeanstalkEnvironment.EnvironmentName}.elasticbeanstalk.com"
