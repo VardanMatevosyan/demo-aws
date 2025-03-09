@@ -127,6 +127,7 @@ jobs:
   deploy-eb-app-job:
     executor: base-executor
     steps:
+      - checkout
       - attach_workspace:
           at: .
       - eb/setup
