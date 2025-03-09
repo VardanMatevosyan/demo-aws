@@ -102,8 +102,8 @@ commands:
           command: |
             eb init $EB_APP_CF_NAME_TEST -r $AWS_REGION -p corretto-21
             echo "deploy:
-                    artifact: build/libs/demo-aws-0.0.1.jar" >> .elasticbeanstalk/config.yml
-            eb deploy $EB_ENV_CF_NAME_TEST --label demo-aws-cf-test-$(date +%Y%m%d)-$(git rev-parse --short HEAD)
+                    artifact: build/libs/demo-aws--$(date +%Y%m%d)-$(git rev-parse HEAD).jar" >> .elasticbeanstalk/config.yml
+            eb deploy $EB_ENV_CF_NAME_TEST --label demo-aws-cf-test-$(date +%Y%m%d)-$(git rev-parse HEAD)
       - run: ls -l build/libs
 jobs:
   build-job:
