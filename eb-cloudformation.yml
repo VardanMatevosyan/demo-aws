@@ -21,7 +21,17 @@ Resources:
     Type: "AWS::ElasticBeanstalk::Application"
     Properties:
       Description: "AWS application"
-#      ApplicationName: !Sub '${EnvironmentName}-${ApplicationName}'
+      ApplicationName: "demo-aws-application-cf-test"
+
+  ApplicationVersion:
+    Type: AWS::ElasticBeanstalk::ApplicationVersion
+    Properties:
+      ApplicationName:
+        Ref: ElasticBeanstalkApp
+      Description: "AWS ElasticBeanstalk Application Version"
+      SourceBundle:
+        S3Bucket: !Sub "elasticbeanstalk-${AWS::Region}-${AWS::AccountId}"
+        S3Key: !Sub "${ElasticBeanstalkApp}/demo-aws-0.0.1.jar"
 
   SampleConfigurationTemplate:
     Type: AWS::ElasticBeanstalk::ConfigurationTemplate
@@ -39,10 +49,10 @@ Resources:
           OptionName: "Subnets"
           Value: !Ref ExistingVpcSubnet1C
 
-        # Deployment Policy - Rolling (Default)
+        # Deployment Policy - AllAtOnce is chosen because it is suitable for a single-instance environment.
         - Namespace: "aws:elasticbeanstalk:command"
           OptionName: "DeploymentPolicy"
-          Value: "Rolling"
+          Value: "AllAtOnce"
 
         # Rolling Batch Size (Fixed: 1 instance at a time)
         - Namespace: "aws:elasticbeanstalk:command"
@@ -63,6 +73,14 @@ Resources:
         - Namespace: "aws:autoscaling:launchconfiguration"
           OptionName: "IamInstanceProfile"
           Value: !Ref BeanstalkInstanceProfile
+
+        - Namespace: "aws:elasticbeanstalk:environment"
+          OptionName: "EnvironmentType"
+          Value: "SingleInstance"
+
+        - Namespace: "aws:ec2:instances"
+          OptionName: "AssociatePublicIpAddress"
+          Value: "true"  # Attaches a public IP to the EC2 instance, because no ELB is used.
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 21"
 
   # Elastic Beanstalk Environment
@@ -72,6 +90,10 @@ Resources:
       ApplicationName: !Ref ElasticBeanstalkApp
       Description: "AWS ElasticBeanstalk Sample demo-aws Environment"
       TemplateName: !Ref SampleConfigurationTemplate
+      VersionLabel: !Ref ApplicationVersion
+      Tier:
+        Name: "WebServer"
+        Type: "Standard"
 
   # Security Group for EC2
   BeanstalkSecurityGroup:
@@ -116,10 +138,19 @@ Resources:
                   - "s3:GetObject"
                   - "s3:PutObject"
                 Resource: "*"
+        - PolicyName: "CustomCfElasticBeanstalkHealthAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "elasticbeanstalk:PutInstanceStatistics"
+                Resource:
+                  - !Sub "arn:aws:elasticbeanstalk:*:${AWS::AccountId}:environment/*/*"
+                  - !Sub "arn:aws:elasticbeanstalk:*:${AWS::AccountId}:application/*"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier
-        - arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker
-        - arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier
+        - arn:aws:iam::aws:policy/AWSElasticBeanstalkCustomPlatformforEC2Role
 
 #Outputs:
 #  EnvironmentURL:

@@ -31,7 +31,7 @@ public class UserController {
     return ResponseEntity.ok(user);
   }
 
-  @GetMapping("/users/{code}/test2")
+  @GetMapping("/users/{code}/test3")
   public ResponseEntity<String> saveUser(@PathVariable String code) {
     return ResponseEntity.ok(code);
   }
