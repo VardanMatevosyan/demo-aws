@@ -78,7 +78,7 @@ Resources:
           OptionName: "EnvironmentType"
           Value: "SingleInstance"
 
-        - Namespace: "aws:ec2:instances"
+        - Namespace: "aws:ec2:vpc"
           OptionName: "AssociatePublicIpAddress"
           Value: "true"  # Attaches a public IP to the EC2 instance, because no ELB is used.
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 21"
