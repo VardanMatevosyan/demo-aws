@@ -41,6 +41,12 @@ Parameters:
   Port:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/PORT"
+  AwsAccessKeyId:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/AWS_ACCESS_KEY_ID"
+  AwsSecretAccessKey:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/AWS_SECRET_ACCESS_KEY"
 
 Resources:
   # Elastic Beanstalk Application
@@ -126,6 +132,14 @@ Resources:
         - Namespace: "aws:elasticbeanstalk:application:environment"
           OptionName: "SERVER_PORT"
           Value: !Ref ServerPort
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "AWS_ACCESS_KEY_ID"
+          Value: !Ref AwsAccessKeyId
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "AWS_SECRET_ACCESS_KEY"
+          Value: !Ref AwsSecretAccessKey
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 21"
 
   # Elastic Beanstalk Environment
