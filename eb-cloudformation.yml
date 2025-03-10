@@ -29,16 +29,6 @@ Resources:
       Description: "AWS application"
       ApplicationName: "demo-aws-application-cf-test"
 
-  ApplicationVersion:
-    Type: AWS::ElasticBeanstalk::ApplicationVersion
-    Properties:
-      ApplicationName:
-        Ref: ElasticBeanstalkApp
-      Description: "AWS ElasticBeanstalk Application Version"
-      SourceBundle:
-        S3Bucket: !Sub "elasticbeanstalk-${AWS::Region}-${AWS::AccountId}"
-        S3Key: !Sub "${ElasticBeanstalkApp}/demo-aws-0.0.1.jar"
-
   SampleConfigurationTemplate:
     Type: AWS::ElasticBeanstalk::ConfigurationTemplate
     Properties:
@@ -100,7 +90,6 @@ Resources:
       ApplicationName: !Ref ElasticBeanstalkApp
       Description: "AWS ElasticBeanstalk Sample demo-aws Environment"
       TemplateName: !Ref SampleConfigurationTemplate
-      VersionLabel: !Ref ApplicationVersion
       Tier:
         Name: "WebServer"
         Type: "Standard"
