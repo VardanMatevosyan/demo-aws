@@ -189,7 +189,9 @@ Resources:
         Statement:
           - Effect: "Allow"
             Principal:
-              Service: "ec2.amazonaws.com"
+              Service:
+                - "ec2.amazonaws.com"
+                - "elasticbeanstalk.amazonaws.com"
             Action: "sts:AssumeRole"
       Policies:
         - PolicyName: "ElasticBeanstalkEC2Policy"
