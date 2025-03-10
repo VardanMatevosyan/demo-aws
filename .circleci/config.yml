@@ -80,7 +80,7 @@ commands:
           command: |
             aws cloudformation deploy \
               --template-file eb-cloudformation.yml \
-              --stack-name dev2 \
+              --stack-name dev \
               --region $AWS_FRANKFURT_REGION \
               --capabilities CAPABILITY_IAM
   deploy-eb-app-command:
