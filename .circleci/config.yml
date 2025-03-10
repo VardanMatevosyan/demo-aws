@@ -89,10 +89,25 @@ commands:
       - run:
           name: "Deploy application to Elastic BeanStalk"
           command: |
+            FULL_APP_JAR_NAME=demo-aws-$(date +%Y%m%d)-$(git rev-parse --short HEAD).jar
+            echo "full jar file name is: $FULL_APP_JAR_NAME"
             eb init $EB_APP_NAME -r $AWS_REGION -p corretto-21
             echo "deploy:
-                    artifact: build/libs/demo-aws-0.0.1.jar" >> .elasticbeanstalk/config.yml
-            eb deploy $EB_ENV_NAME --label demo-aws-$(date +%Y%m%d)-4
+                    artifact: build/libs/$FULL_APP_JAR_NAME" >> .elasticbeanstalk/config.yml
+            eb deploy $EB_ENV_NAME --label demo-aws-$(date +%Y%m%d)-$(git rev-parse HEAD)
+      - run: ls -l build/libs
+  deploy-eb-cf-app-test-command:
+    description: "Deploy the application cf test to Elastic BeanStalk"
+    steps:
+      - run:
+          name: "Deploy application cf test to Elastic BeanStalk"
+          command: |
+            FULL_APP_JAR_NAME=demo-aws-$(date +%Y%m%d)-$(git rev-parse --short HEAD).jar
+            echo "full jar file name is: $FULL_APP_JAR_NAME"
+            eb init $EB_APP_CF_NAME_TEST -r $AWS_REGION -p corretto-21
+            echo "deploy:
+                    artifact: build/libs/$FULL_APP_JAR_NAME" >> .elasticbeanstalk/config.yml
+            eb deploy $EB_ENV_CF_NAME_TEST --label demo-aws-cf-test-$(date +%Y%m%d)-$(git rev-parse HEAD)
       - run: ls -l build/libs
 jobs:
   build-job:
@@ -113,23 +128,25 @@ jobs:
   deploy-eb-app-job:
     executor: base-executor
     steps:
+      - checkout
       - attach_workspace:
           at: .
       - eb/setup
       - deploy-eb-app-command
+      - deploy-eb-cf-app-test-command
 
 workflows:
   version: 2
   build:
     jobs:
       - deploy-main-cf-job
-#      - deploy-eb-cf-job:
-#          context: aws-credentials
+      - deploy-eb-cf-job:
+          context: aws-credentials
       - build-job:
           <<: *only-main-branch-filter
       - deploy-eb-app-job:
           requires:
-#            - deploy-eb-cf-job
+            - deploy-eb-cf-job
             - build-job
           context: aws-credentials
 

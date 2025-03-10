@@ -14,6 +14,39 @@ Parameters:
   ExistingVpcSubnet1C:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/ExistingVpcSubnet1C"
+  AllowedOutboundRdsCidrIp:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/AllowedOutboundRdsCidrIp"
+  Ec2KeyPairName:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/Ec2KeyPairName"
+  RdsSecurityGroup:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RdsSecurityGroup"
+  RdsEndpoint:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDS_ENDPOINT"
+  RdsPassword:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDS_PASSWORD"
+  RdsPort:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDS_PORT"
+  RdsUsername:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDS_USERNAME"
+  ServerPort:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/SERVER_PORT"
+  Port:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/PORT"
+  AwsAccessKeyId:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/AWS_ACCESS_KEY_ID"
+  AwsSecretAccessKey:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/AWS_SECRET_ACCESS_KEY"
 
 Resources:
   # Elastic Beanstalk Application
@@ -21,7 +54,7 @@ Resources:
     Type: "AWS::ElasticBeanstalk::Application"
     Properties:
       Description: "AWS application"
-#      ApplicationName: !Sub '${EnvironmentName}-${ApplicationName}'
+      ApplicationName: "demo-aws-application-cf-test"
 
   SampleConfigurationTemplate:
     Type: AWS::ElasticBeanstalk::ConfigurationTemplate
@@ -39,10 +72,10 @@ Resources:
           OptionName: "Subnets"
           Value: !Ref ExistingVpcSubnet1C
 
-        # Deployment Policy - Rolling (Default)
+        # Deployment Policy - AllAtOnce is chosen because it is suitable for a single-instance environment.
         - Namespace: "aws:elasticbeanstalk:command"
           OptionName: "DeploymentPolicy"
-          Value: "Rolling"
+          Value: "AllAtOnce"
 
         # Rolling Batch Size (Fixed: 1 instance at a time)
         - Namespace: "aws:elasticbeanstalk:command"
@@ -57,12 +90,56 @@ Resources:
         # Associate Security Group
         - Namespace: "aws:autoscaling:launchconfiguration"
           OptionName: "SecurityGroups"
-          Value: !Ref BeanstalkSecurityGroup
+          Value: !Join [",", [!Ref BeanstalkSecurityGroup, !Ref RdsSecurityGroup]]
 
         # IAM Instance Profile (Attach Permissions)
         - Namespace: "aws:autoscaling:launchconfiguration"
           OptionName: "IamInstanceProfile"
           Value: !Ref BeanstalkInstanceProfile
+
+        - Namespace: "aws:elasticbeanstalk:environment"
+          OptionName: "EnvironmentType"
+          Value: "SingleInstance"
+
+        - Namespace: "aws:ec2:vpc"
+          OptionName: "AssociatePublicIpAddress"
+          Value: "true"  # Attaches a public IP to the EC2 instance, because no ELB is used.
+
+        - Namespace: "aws:autoscaling:launchconfiguration"
+          OptionName: "EC2KeyName"
+          Value: !Ref Ec2KeyPairName
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "PORT"
+          Value: !Ref Port
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "RDS_ENDPOINT"
+          Value: !Ref RdsEndpoint
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "RDS_PASSWORD"
+          Value: !Ref RdsPassword
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "RDS_PORT"
+          Value: !Ref RdsPort
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "RDS_USERNAME"
+          Value: !Ref RdsUsername
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "SERVER_PORT"
+          Value: !Ref ServerPort
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "AWS_ACCESS_KEY_ID"
+          Value: !Ref AwsAccessKeyId
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "AWS_SECRET_ACCESS_KEY"
+          Value: !Ref AwsSecretAccessKey
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 21"
 
   # Elastic Beanstalk Environment
@@ -72,11 +149,15 @@ Resources:
       ApplicationName: !Ref ElasticBeanstalkApp
       Description: "AWS ElasticBeanstalk Sample demo-aws Environment"
       TemplateName: !Ref SampleConfigurationTemplate
+      Tier:
+        Name: "WebServer"
+        Type: "Standard"
 
   # Security Group for EC2
   BeanstalkSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
+      GroupName: "SG for EB EC2 instance"
       GroupDescription: "Security group for Elastic Beanstalk instances"
       VpcId: !Ref ExistingVPC
       SecurityGroupIngress:
@@ -88,6 +169,24 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: !Ref AllowedWebEbInboundCidrIp
+        - IpProtocol: "tcp"
+          FromPort: 8081
+          ToPort: 8081
+          CidrIp: !Ref AllowedOutboundRdsCidrIp
+        - IpProtocol: "tcp"
+          FromPort: 443
+          ToPort: 443
+          CidrIp: !Ref AllowedOutboundRdsCidrIp
+      SecurityGroupEgress:
+        # Allow all outbound traffic from EC2 (also needed for updates, etc.)
+        - IpProtocol: "-1"
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: !Ref AllowedOutboundRdsCidrIp
+        - IpProtocol: "tcp"
+          FromPort: 5432
+          ToPort: 5432
+          DestinationSecurityGroupId: !Ref RdsSecurityGroup
 
   # IAM Role for Elastic Beanstalk
   BeanstalkInstanceProfile:
@@ -104,7 +203,9 @@ Resources:
         Statement:
           - Effect: "Allow"
             Principal:
-              Service: "ec2.amazonaws.com"
+              Service:
+                - "ec2.amazonaws.com"
+                - "elasticbeanstalk.amazonaws.com"
             Action: "sts:AssumeRole"
       Policies:
         - PolicyName: "ElasticBeanstalkEC2Policy"
@@ -116,10 +217,19 @@ Resources:
                   - "s3:GetObject"
                   - "s3:PutObject"
                 Resource: "*"
+        - PolicyName: "CustomCfElasticBeanstalkHealthAccessPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "elasticbeanstalk:PutInstanceStatistics"
+                Resource:
+                  - !Sub "arn:aws:elasticbeanstalk:*:${AWS::AccountId}:environment/*/*"
+                  - !Sub "arn:aws:elasticbeanstalk:*:${AWS::AccountId}:application/*"
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier
-        - arn:aws:iam::aws:policy/AWSElasticBeanstalkMulticontainerDocker
-        - arn:aws:iam::aws:policy/AWSElasticBeanstalkWorkerTier
+        - arn:aws:iam::aws:policy/AWSElasticBeanstalkCustomPlatformforEC2Role
 
 #Outputs:
 #  EnvironmentURL:
