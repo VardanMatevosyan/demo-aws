@@ -23,6 +23,24 @@ Parameters:
   RdsSecurityGroup:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/RdsSecurityGroup"
+  RDS_ENDPOINT:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDS_ENDPOINT"
+  RDS_PASSWORD:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDS_PASSWORD"
+  RDS_PORT:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDS_PORT"
+  RDS_USERNAME:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDS_USERNAME"
+  SERVER_PORT:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/SERVER_PORT"
+  PORT:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/PORT"
 
 Resources:
   # Elastic Beanstalk Application
@@ -84,6 +102,30 @@ Resources:
         - Namespace: "aws:autoscaling:launchconfiguration"
           OptionName: "EC2KeyName"
           Value: !Ref Ec2KeyPairName
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "PORT"
+          Value: !Ref PORT
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "RDS_ENDPOINT"
+          Value: !Ref RDS_ENDPOINT
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "RDS_PASSWORD"
+          Value: !Ref RDS_PASSWORD
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "RDS_PORT"
+          Value: !Ref RDS_PORT
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "RDS_USERNAME"
+          Value: !Ref RDS_USERNAME
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "SERVER_PORT"
+          Value: !Ref SERVER_PORT
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 21"
 
   # Elastic Beanstalk Environment
