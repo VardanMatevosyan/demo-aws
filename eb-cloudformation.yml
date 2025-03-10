@@ -23,22 +23,22 @@ Parameters:
   RdsSecurityGroup:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/RdsSecurityGroup"
-  RDS_ENDPOINT:
+  RdsEndpoint:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/RDS_ENDPOINT"
-  RDS_PASSWORD:
+  RdsPassword:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/RDS_PASSWORD"
-  RDS_PORT:
+  RdsPort:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/RDS_PORT"
-  RDS_USERNAME:
+  RdsUsername:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/RDS_USERNAME"
-  SERVER_PORT:
+  ServerPort:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/SERVER_PORT"
-  PORT:
+  Port:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/PORT"
 
@@ -105,27 +105,27 @@ Resources:
 
         - Namespace: "aws:elasticbeanstalk:application:environment"
           OptionName: "PORT"
-          Value: !Ref PORT
+          Value: !Ref Port
 
         - Namespace: "aws:elasticbeanstalk:application:environment"
           OptionName: "RDS_ENDPOINT"
-          Value: !Ref RDS_ENDPOINT
+          Value: !Ref RdsEndpoint
 
         - Namespace: "aws:elasticbeanstalk:application:environment"
           OptionName: "RDS_PASSWORD"
-          Value: !Ref RDS_PASSWORD
+          Value: !Ref RdsPassword
 
         - Namespace: "aws:elasticbeanstalk:application:environment"
           OptionName: "RDS_PORT"
-          Value: !Ref RDS_PORT
+          Value: !Ref RdsPort
 
         - Namespace: "aws:elasticbeanstalk:application:environment"
           OptionName: "RDS_USERNAME"
-          Value: !Ref RDS_USERNAME
+          Value: !Ref RdsUsername
 
         - Namespace: "aws:elasticbeanstalk:application:environment"
           OptionName: "SERVER_PORT"
-          Value: !Ref SERVER_PORT
+          Value: !Ref ServerPort
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 21"
 
   # Elastic Beanstalk Environment
