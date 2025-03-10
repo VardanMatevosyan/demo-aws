@@ -20,6 +20,9 @@ Parameters:
   Ec2KeyPairName:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/Ec2KeyPairName"
+  RdsSecurityGroup:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RdsSecurityGroup"
 
 Resources:
   # Elastic Beanstalk Application
@@ -63,7 +66,7 @@ Resources:
         # Associate Security Group
         - Namespace: "aws:autoscaling:launchconfiguration"
           OptionName: "SecurityGroups"
-          Value: !Ref BeanstalkSecurityGroup
+          Value: !Join [",", [!Ref BeanstalkSecurityGroup, !Ref RdsSecurityGroup]]
 
         # IAM Instance Profile (Attach Permissions)
         - Namespace: "aws:autoscaling:launchconfiguration"
