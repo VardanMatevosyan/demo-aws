@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "AWS Elastic Beanstalk environment setup with free-tier eligible resources."
 
 Parameters:
+
+# AWS resources properties
   ExistingVPC:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/ExistingVPC"
@@ -14,6 +16,12 @@ Parameters:
   ExistingVpcSubnet1C:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/ExistingVpcSubnet1C"
+  ExistingVpcPrivateSubnet1B:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/ExistingVpcPrivateSubnet1B"
+  ExistingVpcPrivateSubnet1A:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/ExistingVpcPrivateSubnet1A"
   AllowedOutboundRdsCidrIp:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/AllowedOutboundRdsCidrIp"
@@ -23,6 +31,32 @@ Parameters:
   RdsSecurityGroup:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/RdsSecurityGroup"
+  AllowedInboundApplicationCidrIp:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/AllowedInboundApplicationCidrIp"
+    Description: "CIDR block to allow application inbound traffic."
+  RDSDatabaseEngine:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDSDatabaseEngine"
+    Description: "Database engine type"
+  RDSDatabaseVersion:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/RDSDatabaseVersion"
+    Description: "Database engine version"
+  AllowedSSHInboundCidrIp:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/AllowedSSHInboundCidrIp"
+    Description: "Public IP to allow SSH access (e.g., 203.0.113.0/32)"
+  ProxyJumpAmiId:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/ProxyJumpAmiId"
+    Description: "AMI ID for Proxy Jump EC2 instance (Amazon Linux 2 recommended)"
+  ProxyJumpServerKeyName:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/ProxyJumpServerKeyName"
+    Description: "Proxy jump server key name to access the instance"
+
+# Application environment variables
   RdsEndpoint:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/RDS_ENDPOINT"
@@ -49,6 +83,49 @@ Parameters:
     Default: "/demo-aws/AWS_SECRET_ACCESS_KEY"
 
 Resources:
+  # DB Subnet Group to use the provided private subnet
+  DBSubnetGroup:
+    Type: "AWS::RDS::DBSubnetGroup"
+    Properties:
+      DBSubnetGroupDescription: "Private Subnet Group for RDS"
+      SubnetIds:
+        - !Ref ExistingVpcPrivateSubnet1A
+        - !Ref ExistingVpcPrivateSubnet1B
+
+  RDSInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceIdentifier: "private-postgres-db"
+      Engine: !Ref RDSDatabaseEngine
+      EngineVersion: !Ref RDSDatabaseVersion
+      DBInstanceClass: "db.t3.micro"
+      AllocatedStorage: "20"
+      StorageType: "gp2"
+      MasterUsername: !Ref RdsUsername
+      MasterUserPassword: !Ref RdsPassword
+      PubliclyAccessible: false
+      MultiAZ: false
+      DBSubnetGroupName: !Ref DBSubnetGroup  # Attached RDS to the Private Subnet
+      VPCSecurityGroups:
+        - !Ref RDSSecurityGroup
+      BackupRetentionPeriod: 7
+      DeletionProtection: false
+      EnableIAMDatabaseAuthentication: true
+
+  # EC2 Instance to act as Proxy Jump Server (Now in Public Subnet)
+  ProxyJumpInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !Ref ProxyJumpAmiId
+      SubnetId: !Ref ExistingVpcSubnet1C
+      SecurityGroupIds:
+        - !Ref ProxyJumpSecurityGroup
+      KeyName: !Ref ProxyJumpServerKeyName  # Ensure you have an existing key-pair for SSH
+      Tags:
+        - Key: Name
+          Value: "Proxy Jump RDS Dev Server"
+
   # Elastic Beanstalk Application
   ElasticBeanstalkApp:
     Type: "AWS::ElasticBeanstalk::Application"
@@ -153,6 +230,40 @@ Resources:
         Name: "WebServer"
         Type: "Standard"
 
+  # Security Group for RDS
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for RDS PostgreSQL"
+      VpcId: !Ref ExistingVPC  # Attach to the existing VPC
+      SecurityGroupIngress:
+        # Allow inbound traffic from the application security group
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref BeanstalkSecurityGroup  # Access from app
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ProxyJumpSecurityGroup  # Access from Proxy Jump EC2
+      SecurityGroupEgress:
+        # Allow all outbound traffic from RDS (needed for updates, replication, etc.)
+        - IpProtocol: -1
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: !Ref AllowedOutboundRdsCidrIp
+
+  ProxyJumpSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for Proxy Jump EC2 to access RDS"
+      VpcId: !Ref ExistingVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref AllowedSSHInboundCidrIp
+
   # Security Group for EC2
   BeanstalkSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -172,11 +283,11 @@ Resources:
         - IpProtocol: "tcp"
           FromPort: 8081
           ToPort: 8081
-          CidrIp: !Ref AllowedOutboundRdsCidrIp
+          CidrIp: !Ref AllowedInboundApplicationCidrIp
         - IpProtocol: "tcp"
           FromPort: 443
           ToPort: 443
-          CidrIp: !Ref AllowedOutboundRdsCidrIp
+          CidrIp: !Ref AllowedInboundApplicationCidrIp
       SecurityGroupEgress:
         # Allow all outbound traffic from EC2 (also needed for updates, etc.)
         - IpProtocol: "-1"
@@ -230,6 +341,12 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSElasticBeanstalkWebTier
         - arn:aws:iam::aws:policy/AWSElasticBeanstalkCustomPlatformforEC2Role
+
+# Outputs variables to use easily to get the value for other config instead of manually searching on AWS
+Outputs:
+  RDSInstanceEndpoint:
+    Description: "RDS PostgreSQL Instance Endpoint"
+    Value: !GetAtt RDSInstance.Endpoint.Address
 
 #Outputs:
 #  EnvironmentURL:
