@@ -83,7 +83,6 @@ jobs:
       - attach_workspace:
           at: .
       - eb/setup
-      - deploy-eb-app-command
       - deploy-eb-cf-app-test-command
 
 workflows:
