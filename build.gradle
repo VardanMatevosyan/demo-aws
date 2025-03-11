@@ -1,7 +1,14 @@
+buildscript {
+    dependencies {
+        classpath("org.flywaydb:flyway-database-postgresql:10.10.0")
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.3.5'
     id 'io.spring.dependency-management' version '1.1.6'
+    id "org.flywaydb.flyway" version "10.15.2"
 }
 
 group = 'org.example'
@@ -30,6 +37,8 @@ ext {
     springCloudVersion = '2.2.6.RELEASE'
     awsSdkVersion = '2.29.1'
     posgresqlVersion = '42.7.4'
+    flywayVersion='11.1.0'
+    flywayDbPostgreSQLVersion='10.10.0'
 }
 
 dependencies {
@@ -45,6 +54,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    implementation "org.flywaydb:flyway-core:${flywayVersion}"
+    implementation "org.flywaydb:flyway-database-postgresql:${flywayDbPostgreSQLVersion}"
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
@@ -65,4 +77,10 @@ tasks.named("jar").configure {
         attributes 'Main-Class': 'org.example.demoaws.DemoAwsApplication'
     }
 
+}
+
+flyway {
+    url = "jdbc:postgresql://${System.getenv('RDS_ENDPOINT') ?: 'localhost'}:${System.getenv('RDS_PORT') ?: '5432'}/postgres?serverTimezone=UTC"
+    user = System.getenv('RDS_USERNAME') ?: 'root'
+    password = System.getenv('RDS_PASSWORD') ?: 'root'
 }

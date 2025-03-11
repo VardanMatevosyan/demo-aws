@@ -35,24 +35,6 @@ commands:
           root: .
           paths:
             - build/libs/*.jar
-  cloudformation-main-deploy-command:
-    description: "Deploy the cloudformation"
-    steps:
-      - run:
-          name: "Configure AWS CLI"
-          command: |
-            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-            aws configure set region $AWS_FRANKFURT_REGION
-
-      - run:
-          name: "Deploy CloudFormation Stack" #  this is when we are using CI envs (too much to define but as an example)
-          command: |
-            aws cloudformation deploy \
-              --template-file cloudformation.yml \
-              --stack-name demo-rds-stack \
-              --region $AWS_FRANKFURT_REGION \
-              --capabilities CAPABILITY_IAM
   deploy-eb-cf-command:
     description: "Deploy the cloudformation to Elastic BeanStalk"
     steps:
@@ -70,19 +52,6 @@ commands:
               --stack-name dev \
               --region $AWS_FRANKFURT_REGION \
               --capabilities CAPABILITY_IAM
-  deploy-eb-app-command:
-    description: "Deploy the application to Elastic BeanStalk"
-    steps:
-      - run:
-          name: "Deploy application to Elastic BeanStalk"
-          command: |
-            FULL_APP_JAR_NAME=demo-aws-$(date +%Y%m%d)-$(git rev-parse --short HEAD).jar
-            echo "full jar file name is: $FULL_APP_JAR_NAME"
-            eb init $EB_APP_NAME -r $AWS_REGION -p corretto-21
-            echo "deploy:
-                    artifact: build/libs/$FULL_APP_JAR_NAME" >> .elasticbeanstalk/config.yml
-            eb deploy $EB_ENV_NAME --label demo-aws-$(date +%Y%m%d)-$(git rev-parse HEAD)
-      - run: ls -l build/libs
   deploy-eb-cf-app-test-command:
     description: "Deploy the application cf test to Elastic BeanStalk"
     steps:
@@ -102,11 +71,6 @@ jobs:
     steps:
       - checkout
       - build-app
-  deploy-main-cf-job:
-    executor: aws-cli-executor
-    steps:
-      - checkout
-      - cloudformation-main-deploy-command
   deploy-eb-cf-job:
     executor: aws-cli-executor
     steps:
@@ -126,16 +90,15 @@ workflows:
   version: 2
   build:
     jobs:
-#      - deploy-main-cf-job
       - deploy-eb-cf-job:
           <<: *only-main-branch-filter
           context: aws-credentials
-#      - build-job:
-#          <<: *only-main-branch-filter
-#      - deploy-eb-app-job:
-#          <<: *only-main-branch-filter
-#          requires:
-#            - deploy-eb-cf-job
-#            - build-job
-#          context: aws-credentials
+      - build-job:
+          <<: *only-main-branch-filter
+      - deploy-eb-app-job:
+          <<: *only-main-branch-filter
+          requires:
+            - deploy-eb-cf-job
+            - build-job
+          context: aws-credentials
 
