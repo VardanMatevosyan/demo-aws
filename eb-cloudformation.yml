@@ -28,9 +28,9 @@ Parameters:
   Ec2KeyPairName:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/Ec2KeyPairName"
-  RdsSecurityGroup:
-    Type: "AWS::SSM::Parameter::Value<String>"
-    Default: "/demo-aws/RdsSecurityGroup"
+#  RdsSecurityGroup:
+#    Type: "AWS::SSM::Parameter::Value<String>"
+#    Default: "/demo-aws/RdsSecurityGroup"
   AllowedInboundApplicationCidrIp:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/AllowedInboundApplicationCidrIp"
