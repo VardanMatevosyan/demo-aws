@@ -112,21 +112,21 @@ Resources:
       DeletionProtection: false
       EnableIAMDatabaseAuthentication: true
 
-#  # EC2 Instance to act as Proxy Jump Server (Now in Public Subnet)
-#  ProxyJumpInstance:
-#    Type: AWS::EC2::Instance
-#    Properties:
-#      InstanceType: t2.micro
-#      ImageId: !Ref ProxyJumpAmiId
-#      SubnetId: !Ref ExistingVpcSubnet1C
-#      SecurityGroupIds:
-#        - !Ref ProxyJumpSecurityGroup
-#      KeyName: !Ref ProxyJumpServerKeyName  # Ensure you have an existing key-pair for SSH
-#      Tags:
-#        - Key: Name
-#          Value: "Proxy Jump RDS Dev Server"
-#        - Key: ForceUpdate
-#          Value: "2"
+  # EC2 Instance to act as Proxy Jump Server (Now in Public Subnet)
+  ProxyJumpEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      ImageId: !Ref ProxyJumpAmiId
+      SubnetId: !Ref ExistingVpcSubnet1C
+      SecurityGroupIds:
+        - !Ref ProxyJumpSecurityGroup
+      KeyName: !Ref ProxyJumpServerKeyName  # Ensure you have an existing key-pair for SSH
+      Tags:
+        - Key: Name
+          Value: "Proxy Jump RDS Dev Server"
+        - Key: ForceUpdate
+          Value: "2"
 
   # Elastic Beanstalk Application
   ElasticBeanstalkApp:
