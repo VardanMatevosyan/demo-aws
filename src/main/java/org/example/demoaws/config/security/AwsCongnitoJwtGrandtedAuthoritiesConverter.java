@@ -1,8 +1,10 @@
 package org.example.demoaws.config.security;
 
 import static java.util.Objects.isNull;
+import static org.hibernate.type.descriptor.java.IntegerJavaType.ZERO;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -30,11 +32,11 @@ public class AwsCongnitoJwtGrandtedAuthoritiesConverter
   }
 
   private List<SimpleGrantedAuthority> getUserPermissions(Jwt source) {
-    return extractAuthorities(source, "custom:permissions", "SCOPE_");
+    return extractAuthorities(source, "custom:permissions", "PERMISSION_");
   }
 
   private List<SimpleGrantedAuthority> extractAuthorities(Jwt source, String claim, String prefix) {
-    List<String> groupClaims = source.getClaimAsStringList(claim);
+    List<String> groupClaims = getClaimValues(source, claim);
     if (isNull(groupClaims)) {
       return List.of();
     }
@@ -43,6 +45,25 @@ public class AwsCongnitoJwtGrandtedAuthoritiesConverter
         .map(group -> prefix + group)
         .map(SimpleGrantedAuthority::new)
         .toList();
+  }
+
+  private static List<String> getClaimValues(Jwt source, String claim) {
+    List<String> groupClaims = source.getClaimAsStringList(claim);
+    if (isCustomPermissionsClaim(groupClaims)) {
+      String[] permissionsArray = getPermissionsArray(groupClaims);
+      return Arrays.asList(permissionsArray);
+    } else {
+      return groupClaims;
+    }
+  }
+
+  private static String[] getPermissionsArray(List<String> groupClaims) {
+    String permissions = groupClaims.getFirst();
+    return permissions.split(",");
+  }
+
+  private static boolean isCustomPermissionsClaim(List<String> groupClaims) {
+    return groupClaims.size() == 1 && groupClaims.getFirst().contains(",");
   }
 
 }
