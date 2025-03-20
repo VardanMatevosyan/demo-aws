@@ -125,6 +125,8 @@ Resources:
       Tags:
         - Key: Name
           Value: "Proxy Jump RDS Dev Server"
+        - Key: ForceUpdate
+          Value: "1"
 
   # Elastic Beanstalk Application
   ElasticBeanstalkApp:
