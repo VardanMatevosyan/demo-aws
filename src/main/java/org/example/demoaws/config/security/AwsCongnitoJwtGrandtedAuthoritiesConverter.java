@@ -30,7 +30,7 @@ public class AwsCongnitoJwtGrandtedAuthoritiesConverter
   }
 
   private List<SimpleGrantedAuthority> getUserPermissions(Jwt source) {
-    return extractAuthorities(source, "user:permissions", "SCOPE_");
+    return extractAuthorities(source, "custom:permissions", "SCOPE_");
   }
 
   private List<SimpleGrantedAuthority> extractAuthorities(Jwt source, String claim, String prefix) {
