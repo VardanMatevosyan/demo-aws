@@ -27,7 +27,7 @@ public class UserController {
     return ResponseEntity.noContent().build();
   }
 
-  @PreAuthorize("hasAuthority('ADMIN:READ')")
+  @PreAuthorize("hasAuthority('PERMISSION_ADMIN:READ')")
   @GetMapping("/users/{id}")
   public ResponseEntity<User> saveUser(@PathVariable Long id) {
     User user = userService.findById(id);
