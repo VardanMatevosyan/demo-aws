@@ -78,6 +78,9 @@ Parameters:
   AwsSecretAccessKey:
     Type: "AWS::SSM::Parameter::Value<String>"
     Default: "/demo-aws/AWS_SECRET_ACCESS_KEY"
+  IdpProviderHost:
+    Type: "AWS::SSM::Parameter::Value<String>"
+    Default: "/demo-aws/IDP_PROVIDER_HOST"
 
 Resources:
   # DB Subnet Group to use the provided private subnet
@@ -214,6 +217,10 @@ Resources:
         - Namespace: "aws:elasticbeanstalk:application:environment"
           OptionName: "AWS_SECRET_ACCESS_KEY"
           Value: !Ref AwsSecretAccessKey
+
+        - Namespace: "aws:elasticbeanstalk:application:environment"
+          OptionName: "IDP_PROVIDER_HOST"
+          Value: !Ref IdpProviderHost
       SolutionStackName: "64bit Amazon Linux 2023 v4.4.4 running Corretto 21"
 
   # Elastic Beanstalk Environment
