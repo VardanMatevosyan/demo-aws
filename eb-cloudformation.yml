@@ -113,7 +113,7 @@ Resources:
       EnableIAMDatabaseAuthentication: true
 
   # EC2 Instance to act as Proxy Jump Server (Now in Public Subnet)
-  ProxyJumpInstance:
+  ProxyJumpEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
@@ -125,6 +125,8 @@ Resources:
       Tags:
         - Key: Name
           Value: "Proxy Jump RDS Dev Server"
+        - Key: ForceUpdate
+          Value: "2"
 
   # Elastic Beanstalk Application
   ElasticBeanstalkApp:
