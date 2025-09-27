@@ -8,3 +8,16 @@ Content-Type: application/json
 }
 
 ###
+
+
+
+### Post request
+POST http://host_part_name.eu-central-1.elasticbeanstalk.com//users
+Content-Type: application/json
+
+{
+  "name": "New",
+  "email": "new-user-test@james.com"
+}
+
+###

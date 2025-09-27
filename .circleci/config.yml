@@ -7,7 +7,8 @@ only-main-branch-filter: &only-main-branch-filter
   filters:
     branches:
       only:
-        - main
+# No need to deploy for now.
+#        - main
         - /^.*testing-deploy.*$/
       ignore:
         - feature/*

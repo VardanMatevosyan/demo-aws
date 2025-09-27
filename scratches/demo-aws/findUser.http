@@ -2,3 +2,17 @@
 GET http://localhost:8081/users/1
 
 ###
+### GET request
+GET http://host_part_name.eu-central-1.elasticbeanstalk.com/users/1
+Authorization: Bearer id_token
+
+###
+
+### GET request
+GET http://host_part_name.eu-central-1.elasticbeanstalk.com/users/2123/test2
+
+###
+
+### GET women's day page
+GET http://host_part_name.eu-central-1.elasticbeanstalk.com/congratulations
+###
