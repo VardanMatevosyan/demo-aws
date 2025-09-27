@@ -353,8 +353,3 @@ Outputs:
   RDSInstanceEndpoint:
     Description: "RDS PostgreSQL Instance Endpoint"
     Value: !GetAtt RDSInstance.Endpoint.Address
-
-#Outputs:
-#  EnvironmentURL:
-#    Description: "URL of the deployed Elastic Beanstalk environment"
-#    Value: !Sub "http://${ElasticBeanstalkEnvironment.EnvironmentName}.elasticbeanstalk.com"

@@ -1,6 +1,8 @@
 # demo-aws
 Demo code using AWS cloud services (S3, DynamoDB, RDS, ...) by using security best practice and to test different services
 
+Documentation links: [README_DOC_SOURCES.md](readme%2FREADME_DOC_SOURCES.md)
+
 # AWS commands:
 
 # **RDS**
